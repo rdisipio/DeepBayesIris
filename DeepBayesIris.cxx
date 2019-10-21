@@ -23,10 +23,10 @@ DeepBayesIris::DeepBayesIris(const std::string& name)
 
     // Structure of the neural network: 4(in) -> 5(hid) -> 3(out)
     // each hidden neuron has 4+1(bias) inputs
-    const float max_weight = 10.;
+    const float max_weight = 20.;
 
     m_n_inputs = 4;
-    m_n_hidden = 5;
+    m_n_hidden = 2;
     m_n_outputs = 3;
 
     char pname[32];
@@ -65,7 +65,7 @@ DeepBayesIris::DeepBayesIris(const std::string& name)
     
     std::cout << "Number of parameters:" << GetNParameters() << std::endl;
 
-    SetFlagFillHistograms(false);
+    //SetFlagFillHistograms(false);
 
     for( int i = 0 ; i < m_n_outputs ; i++ ) {
         sprintf(pname, "y_%i", i );
@@ -128,26 +128,31 @@ void DeepBayesIris::FeedForward( std::vector<double> &inputs, std::vector<double
     int k = 0;
     int l = 0;
     for( int i = 0 ; i < m_n_hidden ; i++ ) {
+        hidden[i] = bias.at(l);
+        l++;
+
         for( int j = 0 ; j < m_n_inputs ; j++ ) {
             hidden[i] += inputs.at(j) * weights.at(k);
             k++;
         }
-        hidden[i] += bias.at(l);
-        l++;
+        
     }
 
     //ReLU( hidden );
     Tanh( hidden );
 
     // output layer
-    std::fill( outputs.begin(), outputs.end(), 0. );
+    //std::fill( outputs.begin(), outputs.end(), 0. );
+    outputs = { 0., 0., 0. };
     for( int i = 0 ; i < m_n_outputs ; i++ ) {
+        outputs[i] = bias[l];
+        l++;
+
         for( int j = 0 ; j < m_n_hidden ; j++ ) {
             outputs[i] += hidden[j] * weights[k];
             k++;
         }
-        outputs[i] += bias[l];
-        l++;
+        
     }
 
     Softmax( outputs );
@@ -224,12 +229,15 @@ double DeepBayesIris::LogLikelihood(const std::vector<double>& parameters)
         }
 
         for( size_t i = 0 ; i < m_n_outputs ; i++ ) {
-            // L +=  ( outputs[i] - targets[i] )*( outputs[i] - targets[i] ) / float(N); // MSE
-            //std::cout << outputs[i] << " " << targets[i] << std::endl;
-            L += targets[i] * log( outputs[i] ); // cross-entropy
+            L +=  ( outputs[i] - targets[i] )*( outputs[i] - targets[i] ) / float(N); // MSE
+            //L -= targets[i] * log( outputs[i] ); // cross-entropy
 
             GetObservable(i).Value( outputs[i]);
         }
+
+        //std::cout << "input " << i << ":" << inputs[0] << " " << inputs[1] << " " << inputs[2] << " " << inputs[3] << std::endl;
+        //std::cout << "O=" << outputs[0] << " " << outputs[1] << " " << outputs[2] << std::endl;
+        //std::cout << "T=" << targets[0] << " " << targets[1] << " " << targets[2] << std::endl;
 
     }
     
