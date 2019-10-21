@@ -63,8 +63,11 @@ int main()
 
     // set precision
     m.SetPrecision(BCEngineMCMC::kMedium);
+    //m.SetPrecision(BCEngineMCMC::kHigh);
 
     m.SetIrisData( all_iris_data );
+
+    m.SetNIterationsPreRunMax( 1000000 );
 
     BCLog::OutSummary("Test model created");
 
@@ -84,10 +87,10 @@ int main()
     m.PrintAllMarginalized(m.GetSafeName() + "_plots.pdf");
 
     // print summary plots
-    // m.PrintParameterPlot(m.GetSafeName() + "_parameters.pdf");
-    // m.PrintCorrelationPlot(m.GetSafeName() + "_correlation.pdf");
-    // m.PrintCorrelationMatrix(m.GetSafeName() + "_correlationMatrix.pdf");
-    // m.PrintKnowledgeUpdatePlots(m.GetSafeName() + "_update.pdf");
+    m.PrintParameterPlot(m.GetSafeName() + "_parameters.pdf");
+    m.PrintCorrelationPlot(m.GetSafeName() + "_correlation.pdf");
+    m.PrintCorrelationMatrix(m.GetSafeName() + "_correlationMatrix.pdf");
+    m.PrintKnowledgeUpdatePlots(m.GetSafeName() + "_update.pdf");
 
     // print results of the analysis into a text file
     m.PrintSummary();
