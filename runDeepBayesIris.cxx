@@ -10,6 +10,7 @@
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
+#include <numeric>
 
 #include <BAT/BCLog.h>
 #include <BAT/BCAux.h>
@@ -20,6 +21,85 @@
 #include "csv.h"
 
 #define CSV_IO_NO_THREAD
+
+void Standardize( IrisDataCollection_t& data )
+{
+    const size_t n_data = data.size();
+    double mean = 0.;
+    double stdev = 0;
+
+    // sepal_length
+    mean = 0.;
+    stdev = 0;
+    for( int i = 0; i < n_data ; i++ ) {
+            mean += data[i].sepal_length;
+    }
+    mean /= float(n_data);
+
+    for( int i = 0; i < n_data ; i++ ) {
+        stdev += ( data[i].sepal_length - mean )*( data[i].sepal_length - mean );
+    }
+    stdev /= float(n_data);
+    stdev = std::sqrt(stdev);
+
+    for( int i = 0; i < n_data ; i++ ) {
+        data[i].sepal_length = ( data[i].sepal_length - mean ) / stdev;
+    }
+
+    // sepal_width
+    mean = 0.;
+    stdev = 0;
+    for( int i = 0; i < n_data ; i++ ) {
+            mean += data[i].sepal_width;
+    }
+    mean /= float(n_data);
+
+    for( int i = 0; i < n_data ; i++ ) {
+        stdev += ( data[i].sepal_width - mean )*( data[i].sepal_width - mean );
+    }
+    stdev /= float(n_data);
+    stdev = std::sqrt(stdev);
+
+    for( int i = 0; i < n_data ; i++ ) {
+        data[i].sepal_width = ( data[i].sepal_width - mean ) / stdev;
+    }
+
+    // petal_length
+    mean = 0.;
+    stdev = 0;
+    for( int i = 0; i < n_data ; i++ ) {
+            mean += data[i].petal_length;
+    }
+    mean /= float(n_data);
+
+    for( int i = 0; i < n_data ; i++ ) {
+        stdev += ( data[i].petal_length - mean )*( data[i].petal_length - mean );
+    }
+    stdev /= float(n_data);
+    stdev = std::sqrt(stdev);
+
+    for( int i = 0; i < n_data ; i++ ) {
+        data[i].petal_length = ( data[i].petal_length - mean ) / stdev;
+    }
+
+    // petal_width
+    mean = 0.;
+    stdev = 0;
+    for( int i = 0; i < n_data ; i++ ) {
+            mean += data[i].petal_width;
+    }
+    mean /= float(n_data);
+
+    for( int i = 0; i < n_data ; i++ ) {
+        stdev += ( data[i].petal_width - mean )*( data[i].petal_width - mean );
+    }
+    stdev /= float(n_data);
+    stdev = std::sqrt(stdev);
+
+    for( int i = 0; i < n_data ; i++ ) {
+        data[i].petal_width = ( data[i].petal_width - mean ) / stdev;
+    }
+}
 
 int main()
 {
@@ -38,7 +118,7 @@ int main()
     iris_data_t iris_data;
     std::string variety;
     while(ifile.read_row( iris_data.sepal_length, iris_data.sepal_width, iris_data.petal_length, iris_data.petal_width, variety ) ) {
-        variety.erase(remove( variety.begin(), variety.end(), '\"' ), variety.end());
+        variety.erase(remove( variety.begin(), variety.end(), '\"' ), variety.end()); // remove quotes from string
 
         if( variety == "Setosa" ) {
             iris_data.variety = IRIS_VARIETY::SETOSA;
@@ -55,7 +135,19 @@ int main()
 
         all_iris_data.push_back( iris_data );
     }
-    BCLog::OutSummary("Input data: found " + std::to_string(all_iris_data.size()) + " entries." );
+
+    const int n_data = all_iris_data.size();
+    BCLog::OutSummary("Input data: found " + std::to_string(n_data) + " entries." );
+
+    // Pre-process input data
+    Standardize( all_iris_data );
+    for( int i = 0; i < n_data; i++ ) {
+        std::cout   << all_iris_data.at(i).sepal_length << " "
+                    << all_iris_data.at(i).sepal_width << " "
+                    << all_iris_data.at(i).petal_length << " "
+                    << all_iris_data.at(i).petal_width << std::endl;
+    }
+
     BCLog::OutSummary("Input data: done.");
 
     // create new DeepBayesIris object
@@ -64,10 +156,10 @@ int main()
     // set precision
     m.SetPrecision(BCEngineMCMC::kMedium);
     //m.SetPrecision(BCEngineMCMC::kHigh);
+    m.SetNIterationsPreRunMax( 1000000 );
 
     m.SetIrisData( all_iris_data );
 
-    m.SetNIterationsPreRunMax( 1000000 );
 
     BCLog::OutSummary("Test model created");
 

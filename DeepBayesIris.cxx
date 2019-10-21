@@ -83,20 +83,26 @@ DeepBayesIris::~DeepBayesIris()
     // destructor
 }
 
-void DeepBayesIris::Activation( std::vector<double> & x )
+void DeepBayesIris::ReLU( std::vector<double> & x )
 {
-    // ReLU
-    /*
     for( size_t i = 0 ; i < x.size() ; i++ ) {
         x[i] = ( x[i]>0.) ? x[i] : 0.;
     }
-    */
+}
 
-   // Sigmoid
+void DeepBayesIris::Sigmoid( std::vector<double> & x )
+{
    for( size_t i = 0 ; i < x.size() ; i++ ) {
        double exp_value = exp((double) -x[i]);
        x[i] = 1. / (1. + exp_value);
    }
+}
+
+void DeepBayesIris::Tanh( std::vector<double> & x )
+{
+    for( size_t i = 0 ; i < x.size() ; i++ ) {
+        x[i] = tanh(x[i]);
+    }
 }
 
 void DeepBayesIris::Softmax( std::vector<double> & x )
@@ -130,7 +136,8 @@ void DeepBayesIris::FeedForward( std::vector<double> &inputs, std::vector<double
         l++;
     }
 
-    Activation( hidden );
+    //ReLU( hidden );
+    Tanh( hidden );
 
     // output layer
     std::fill( outputs.begin(), outputs.end(), 0. );
@@ -142,8 +149,9 @@ void DeepBayesIris::FeedForward( std::vector<double> &inputs, std::vector<double
         outputs[i] += bias[l];
         l++;
     }
-    Softmax( outputs );
 
+    //Softmax( outputs );
+    Sigmoid( outputs );
 }
 
 // ---------------------------------------------------------
@@ -216,8 +224,9 @@ double DeepBayesIris::LogLikelihood(const std::vector<double>& parameters)
         }
 
         for( size_t i = 0 ; i < m_n_outputs ; i++ ) {
-            L +=  ( outputs[i] - targets[i] )*( outputs[i] - targets[i] ) / float(N);
+            L +=  ( outputs[i] - targets[i] )*( outputs[i] - targets[i] ) / float(N); // MSE
             //std::cout << outputs[i] << " " << targets[i] << std::endl;
+            //L += targets[i] * log( outputs[i] ); // cross-entropy
 
             GetObservable(i).Value( outputs[i]);
         }

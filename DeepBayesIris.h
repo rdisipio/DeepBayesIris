@@ -58,7 +58,9 @@ protected:
     void GetWeights( std::vector<double> parameters, std::vector<double>& weights, std::vector<double>& bias );
     void FeedForward( std::vector<double> &inputs, std::vector<double> &weights, std::vector<double> &bias, std::vector<double> & outputs );
 
-    void Activation( std::vector<double> & x );
+    void ReLU( std::vector<double> & x );
+    void Sigmoid( std::vector<double> & x );
+    void Tanh( std::vector<double> & x );
     void Softmax( std::vector<double> & x );
 
 private:
