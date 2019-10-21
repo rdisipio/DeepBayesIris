@@ -150,8 +150,8 @@ void DeepBayesIris::FeedForward( std::vector<double> &inputs, std::vector<double
         l++;
     }
 
-    //Softmax( outputs );
-    Sigmoid( outputs );
+    Softmax( outputs );
+    //Sigmoid( outputs );
 }
 
 // ---------------------------------------------------------
@@ -224,9 +224,9 @@ double DeepBayesIris::LogLikelihood(const std::vector<double>& parameters)
         }
 
         for( size_t i = 0 ; i < m_n_outputs ; i++ ) {
-            L +=  ( outputs[i] - targets[i] )*( outputs[i] - targets[i] ) / float(N); // MSE
+            // L +=  ( outputs[i] - targets[i] )*( outputs[i] - targets[i] ) / float(N); // MSE
             //std::cout << outputs[i] << " " << targets[i] << std::endl;
-            //L += targets[i] * log( outputs[i] ); // cross-entropy
+            L += targets[i] * log( outputs[i] ); // cross-entropy
 
             GetObservable(i).Value( outputs[i]);
         }
