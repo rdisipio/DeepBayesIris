@@ -238,8 +238,8 @@ double DeepBayesIris::LogLikelihood(const std::vector<double>& parameters)
         }
 
         for( size_t i = 0 ; i < m_n_outputs ; i++ ) {
-            L +=  ( outputs[i] - targets[i] )*( outputs[i] - targets[i] ) / float(N); // MSE
-            //L -= targets[i] * log( outputs[i] ); // cross-entropy
+            //L +=  ( outputs[i] - targets[i] )*( outputs[i] - targets[i] ) / float(N); // MSE
+            L -= targets[i] * log( outputs[i] ); // cross-entropy
 
             GetObservable(i).Value( outputs[i]);
         }
