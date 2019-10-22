@@ -275,6 +275,8 @@ double DeepBayesIris::LogLikelihood(const std::vector<double>& parameters)
 // ---------------------------------------------------------
 void DeepBayesIris::MCMCUserIterationInterface()
 {
+    return;
+    /*
     int nchains = GetNChains();
     for( int ichain = 0 ; ichain < nchains; ichain++ ) {
         double logP = GetLogProbx(ichain);
@@ -283,5 +285,5 @@ void DeepBayesIris::MCMCUserIterationInterface()
         long n = m_loss[ichain]->GetN();
         m_loss.at(ichain)->SetPoint( n, double(n), logP );
     }
-    
+    */
 }
