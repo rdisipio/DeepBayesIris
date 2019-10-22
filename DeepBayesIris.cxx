@@ -23,7 +23,7 @@ DeepBayesIris::DeepBayesIris(const std::string& name)
 
     // Structure of the neural network: 4(in) -> 5(hid) -> 3(out)
     // each hidden neuron has 4+1(bias) inputs
-    const float max_weight = 20.;
+    const float max_weight = 100.;
 
     m_n_inputs = 4;
     m_n_hidden = 2;
