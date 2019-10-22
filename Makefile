@@ -27,7 +27,8 @@ PRGSRCS = runDeepBayesIris.cxx
 # compiler and flags
 CXX       = g++
 CXXFLAGS  = -g -O2 -Wall -fPIC -Wno-deprecated 
-LD        = /Library/Developer/CommandLineTools/usr/bin/ld
+#LD        = /Library/Developer/CommandLineTools/usr/bin/ld
+LD = /usr/bin/ld
 LDFLAGS   = -g -O2 
 
 # ----------------------------------------------------------------------
@@ -36,7 +37,7 @@ LDFLAGS   = -g -O2
 # directories, update $PATH accordingly.
 
 CXXFLAGS += $(shell bat-config --cflags)
-LIBS := $(shell bat-config --libs)
+LIBS := $(shell bat-config --libs) -lpthread
 
 # ----------------------------------------------------------------------
 # don't change lines below unless you know what you're doing
