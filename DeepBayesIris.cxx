@@ -93,10 +93,12 @@ DeepBayesIris::DeepBayesIris(const std::string& name)
 DeepBayesIris::~DeepBayesIris()
 {
     // destructor
+    /*
     int n_chains = GetNChains();
     for( int i = 0 ; i < n_chains; i++ ) {
         delete m_loss[i];
     }
+    */
 }
 
 void DeepBayesIris::ReLU( std::vector<double> & x )
