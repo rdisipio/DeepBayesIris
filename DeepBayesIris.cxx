@@ -33,15 +33,15 @@ DeepBayesIris::DeepBayesIris(const std::string& name)
     char desc[128];
     for( int i = 0 ; i < m_n_hidden ; i++ ) {
         for( int j = 0 ; j < m_n_inputs ; j++ ) {
-            sprintf(pname, "h_w%i%i", i, j);
-            sprintf(desc, "Hidden Node %i, weight %i", i, j);
+            sprintf(pname, "Wh_%i_%i", i, j);
+            sprintf(desc, "Wh_%i_%i", i, j);
             AddParameter( pname, -max_weight, max_weight, desc );
             GetParameters().Back().SetPriorConstant();
             std::cout << "Added param: " << desc << std::endl;
         }
         // bias
-        sprintf(pname, "h_b%i", i );
-        sprintf(desc, "Hidden Node %i, bias", i);
+        sprintf(pname, "bh_%i", i );
+        sprintf(desc, "bh_%i", i);
         AddParameter( pname, -max_weight, max_weight, desc);
         GetParameters().Back().SetPriorConstant();
         std::cout << "Added param: " << desc << std::endl;
@@ -49,15 +49,15 @@ DeepBayesIris::DeepBayesIris(const std::string& name)
 
     for( int i = 0 ; i < m_n_outputs ; i++ ) {
         for( int j = 0 ; j < m_n_hidden ; j++ ) {
-            sprintf(pname, "o_w%i%i", i, j);
-            sprintf(desc, "Output Node %i, weight %i", i, j);
+            sprintf(pname, "Wo_%i_%i", i, j);
+            sprintf(desc, "Wo_%i_%i", i, j);
             AddParameter( pname, -max_weight, max_weight, desc );
             GetParameters().Back().SetPriorConstant();
             std::cout << "Added param: " << desc << std::endl;
         }
         // bias
-        sprintf(pname, "o_b%i", i );
-        sprintf(desc, "Output Node %i, bias", i);
+        sprintf(pname, "bo_%i", i );
+        sprintf(desc, "bo_%i", i);
         AddParameter( pname, -max_weight, max_weight, desc);
         GetParameters().Back().SetPriorConstant();
         std::cout << "Added param: " << desc << std::endl;
@@ -69,7 +69,7 @@ DeepBayesIris::DeepBayesIris(const std::string& name)
 
     for( int i = 0 ; i < m_n_outputs ; i++ ) {
         sprintf(pname, "y_%i", i );
-        sprintf(desc, "Network Output %i", i);
+        sprintf(desc, "y_%i", i);
         AddObservable( pname, 0., 1., desc );
     }
     SetFillHistogramObsObs( 0, 1 );
@@ -120,6 +120,8 @@ void DeepBayesIris::Softmax( std::vector<double> & x )
 // ---------------------------------------------------------
 void DeepBayesIris::FeedForward( std::vector<double> &inputs, std::vector<double> &weights, std::vector<double> &bias, std::vector<double> & outputs )
 {
+    // h_i = sigma(Wh_ij * x_j + b_i )
+
     std::vector<double> hidden( m_n_hidden, 0. );
 
     //std::cout << inputs.size() << " " << weights.size() << " " << bias.size() << " " << outputs.size() <<  std::endl;
@@ -143,7 +145,7 @@ void DeepBayesIris::FeedForward( std::vector<double> &inputs, std::vector<double
 
     // output layer
     //std::fill( outputs.begin(), outputs.end(), 0. );
-    outputs = { 0., 0., 0. };
+    //outputs = { 0., 0., 0. };
     for( int i = 0 ; i < m_n_outputs ; i++ ) {
         outputs[i] = bias[l];
         l++;
