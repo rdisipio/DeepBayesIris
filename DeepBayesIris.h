@@ -9,6 +9,8 @@
 
 #include <BAT/BCModel.h>
 
+#include <TGraph.h>
+
 #include <string>
 #include <vector>
 #include <string>
@@ -55,7 +57,11 @@ public:
     void SetIrisData( IrisDataCollection& data ) { m_iris_data = &data; };
     IrisDataCollection * GetIrisData() const { return m_iris_data; };
 
+    std::vector<TGraph*>& GetLossGraphs() { return m_loss; };
+
 protected:
+    void MCMCUserIterationInterface();
+
     void GetWeights( std::vector<double> parameters, std::vector<double>& Wh, std::vector<double>& Wy, std::vector<double>& bh, std::vector<double>& by );
     void FeedForward( std::vector<double> &inputs, std::vector<double>& Wh, std::vector<double>& Wy, std::vector<double>& bh, std::vector<double>& by, std::vector<double> & outputs );
 
@@ -66,6 +72,8 @@ protected:
 
 private:
     IrisDataCollection * m_iris_data;
+
+    std::vector<TGraph*> m_loss; 
 
     int m_n_inputs;
     int m_n_hidden;

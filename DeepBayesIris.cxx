@@ -29,6 +29,15 @@ DeepBayesIris::DeepBayesIris(const std::string& name)
     m_n_hidden = 2;
     m_n_outputs = 3;
 
+    int n_chains = GetNChains();
+    char cname[32];
+    for( int i = 0 ; i < n_chains; i++ ) {
+        m_loss.push_back( new TGraph() );
+
+        sprintf( cname, "chain_%i_loss", i);
+        m_loss.at(i)->SetName(cname);
+    }
+
     char pname[32];
     char desc[128];
     for( int i = 0 ; i < m_n_hidden ; i++ ) {
@@ -84,6 +93,10 @@ DeepBayesIris::DeepBayesIris(const std::string& name)
 DeepBayesIris::~DeepBayesIris()
 {
     // destructor
+    int n_chains = GetNChains();
+    for( int i = 0 ; i < n_chains; i++ ) {
+        delete m_loss[i];
+    }
 }
 
 void DeepBayesIris::ReLU( std::vector<double> & x )
@@ -258,3 +271,17 @@ double DeepBayesIris::LogLikelihood(const std::vector<double>& parameters)
 // This returns the log of the prior probability for the parameters
 // If you use built-in 1D priors, don't uncomment this function.
 // }
+
+// ---------------------------------------------------------
+void DeepBayesIris::MCMCUserIterationInterface()
+{
+    int nchains = GetNChains();
+    for( int ichain = 0 ; ichain < nchains; ichain++ ) {
+        double logP = GetLogProbx(ichain);
+
+        
+        long n = m_loss[ichain]->GetN();
+        m_loss.at(ichain)->SetPoint( n, double(n), logP );
+    }
+    
+}
