@@ -12,6 +12,9 @@
 #include <stdexcept>
 #include <numeric>
 
+#include <TGraph.h>
+#include <TFile.h>
+
 #include <BAT/BCLog.h>
 #include <BAT/BCAux.h>
 
@@ -113,6 +116,7 @@ int main()
 
     // set precision
     //m.SetPrecision(BCEngineMCMC::kMedium);
+    //m.SetPrecision(BCEngineMCMC::kHigh);
     m.SetPrecision(BCEngineMCMC::kVeryHigh);
     //m.SetNIterationsPreRunMax( 5000000 );
 
@@ -144,6 +148,13 @@ int main()
 
     // print results of the analysis into a text file
     m.PrintSummary();
+
+    std::vector<TGraph*> loss = m.GetLossGraphs();
+    TFile * ofile = TFile::Open( "loss.root", "RECREATE" );
+    for( int i = 0; i < loss.size() ; i++ ) {
+        loss[i]->Write();
+    }
+    ofile->Close();
 
     // close log file
     BCLog::OutSummary("Exiting");
