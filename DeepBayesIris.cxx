@@ -36,14 +36,14 @@ DeepBayesIris::DeepBayesIris(const std::string& name)
             sprintf(pname, "Wh_%i_%i", i, j);
             sprintf(desc, "Wh_%i_%i", i, j);
             AddParameter( pname, -max_weight, max_weight, desc );
-            GetParameters().Back().SetPriorConstant();
+            //GetParameters().Back().SetPriorConstant();
             std::cout << "Added param: " << desc << std::endl;
         }
         // bias
         sprintf(pname, "bh_%i", i );
         sprintf(desc, "bh_%i", i);
         AddParameter( pname, -max_weight, max_weight, desc);
-        GetParameters().Back().SetPriorConstant();
+        //GetParameters().Back().SetPriorConstant();
         std::cout << "Added param: " << desc << std::endl;
     }
 
@@ -52,19 +52,22 @@ DeepBayesIris::DeepBayesIris(const std::string& name)
             sprintf(pname, "Wo_%i_%i", i, j);
             sprintf(desc, "Wo_%i_%i", i, j);
             AddParameter( pname, -max_weight, max_weight, desc );
-            GetParameters().Back().SetPriorConstant();
+            //GetParameters().Back().SetPriorConstant();
             std::cout << "Added param: " << desc << std::endl;
         }
         // bias
         sprintf(pname, "bo_%i", i );
         sprintf(desc, "bo_%i", i);
         AddParameter( pname, -max_weight, max_weight, desc);
-        GetParameters().Back().SetPriorConstant();
+        //GetParameters().Back().SetPriorConstant();
         std::cout << "Added param: " << desc << std::endl;
     }
     
     std::cout << "Number of parameters:" << GetNParameters() << std::endl;
 
+    for( int i = 0 ; i < GetNParameters() ; i++ ) {
+        SetPriorGauss( i, 0., max_weight/4. );
+    }
     //SetFlagFillHistograms(false);
 
     for( int i = 0 ; i < m_n_outputs ; i++ ) {
