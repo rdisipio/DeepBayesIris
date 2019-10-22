@@ -118,7 +118,10 @@ void DeepBayesIris::Softmax( std::vector<double> & x )
 }
 
 // ---------------------------------------------------------
-void DeepBayesIris::FeedForward( std::vector<double> &inputs, std::vector<double> &weights, std::vector<double> &bias, std::vector<double> & outputs )
+void DeepBayesIris::FeedForward( std::vector<double> &inputs, 
+                                std::vector<double> &Wh, std::vector<double> &Wy,
+                                std::vector<double> &bh, std::vector<double> &by,
+                                std::vector<double> & outputs )
 {
     // h_i = sigma(Wh_ij * x_j + b_i )
 
@@ -128,13 +131,11 @@ void DeepBayesIris::FeedForward( std::vector<double> &inputs, std::vector<double
 
     // hidden layer
     int k = 0;
-    int l = 0;
     for( int i = 0 ; i < m_n_hidden ; i++ ) {
-        hidden[i] = bias.at(l);
-        l++;
+        hidden[i] = bh.at(i);
 
         for( int j = 0 ; j < m_n_inputs ; j++ ) {
-            hidden[i] += inputs.at(j) * weights.at(k);
+            hidden[i] += inputs.at(j) * Wh.at(k);
             k++;
         }
         
@@ -144,14 +145,12 @@ void DeepBayesIris::FeedForward( std::vector<double> &inputs, std::vector<double
     Tanh( hidden );
 
     // output layer
-    //std::fill( outputs.begin(), outputs.end(), 0. );
-    //outputs = { 0., 0., 0. };
+    k = 0;
     for( int i = 0 ; i < m_n_outputs ; i++ ) {
-        outputs[i] = bias[l];
-        l++;
+        outputs[i] = by[i];
 
         for( int j = 0 ; j < m_n_hidden ; j++ ) {
-            outputs[i] += hidden[j] * weights[k];
+            outputs[i] += hidden[j] * Wy[k];
             k++;
         }
         
@@ -162,31 +161,34 @@ void DeepBayesIris::FeedForward( std::vector<double> &inputs, std::vector<double
 }
 
 // ---------------------------------------------------------
-void DeepBayesIris::GetWeights( std::vector<double> parameters, std::vector<double>& weights, std::vector<double>& bias )
+void DeepBayesIris::GetWeights( std::vector<double> parameters, 
+                                std::vector<double>& Wh, std::vector<double>& Wy, 
+                                std::vector<double>& bh, std::vector<double>& by )
 {
     int k = 0;
     // hidden layer
     for( int i = 0 ; i < m_n_hidden ; i++ ) {
         for( int j = 0 ; j < m_n_inputs ; j++ ) {
             double w = parameters[k];
-            weights.push_back(w);
+            Wh.push_back(w);
             k++;
         }
 
         double b = parameters[k];
-        bias.push_back( b );
+        bh.push_back( b );
         k++;
     }
+
     // output layer
     for( int i = 0 ; i < m_n_outputs ; i++ ) {
         for( int j = 0 ; j < m_n_hidden ; j++ ) {
             double w = parameters[k];
-            weights.push_back(w);
+            Wy.push_back(w);
             k++;
         }
 
         double b = parameters[k];
-        bias.push_back( b );
+        by.push_back( b );
         k++;
     }
 }
@@ -199,12 +201,14 @@ double DeepBayesIris::LogLikelihood(const std::vector<double>& parameters)
     // BCMath contains many functions you will find helpful
 
     std::vector<double> inputs( m_n_inputs, 0. );
-    std::vector<double> weights; 
-    std::vector<double> bias; 
+    std::vector<double> Wh; 
+    std::vector<double> Wy;
+    std::vector<double> bh; 
+    std::vector<double> by;
     std::vector<double> outputs( m_n_outputs, 0. );
     std::vector<double> targets( m_n_outputs, 0. );
 
-    GetWeights( parameters, weights, bias );
+    GetWeights( parameters, Wh, Wy, bh, by );
     //std::cout << "weights:" << weights.size() << " bias:" << bias.size() << std::endl;
 
     double L = 0;
@@ -218,7 +222,7 @@ double DeepBayesIris::LogLikelihood(const std::vector<double>& parameters)
 
         //std::cout << "input: " << inputs[0] << " " << inputs[1] << " " << inputs[2] << " " << inputs[3] << std::endl;
 
-        FeedForward( inputs, weights, bias, outputs );
+        FeedForward( inputs, Wh, Wy, bh, by, outputs );
 
         if( m_iris_data->variety.at(i) == SETOSA ) {
             targets = { 1., 0., 0. };

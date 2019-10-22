@@ -56,8 +56,8 @@ public:
     IrisDataCollection * GetIrisData() const { return m_iris_data; };
 
 protected:
-    void GetWeights( std::vector<double> parameters, std::vector<double>& weights, std::vector<double>& bias );
-    void FeedForward( std::vector<double> &inputs, std::vector<double> &weights, std::vector<double> &bias, std::vector<double> & outputs );
+    void GetWeights( std::vector<double> parameters, std::vector<double>& Wh, std::vector<double>& Wy, std::vector<double>& bh, std::vector<double>& by );
+    void FeedForward( std::vector<double> &inputs, std::vector<double>& Wh, std::vector<double>& Wy, std::vector<double>& bh, std::vector<double>& by, std::vector<double> & outputs );
 
     void ReLU( std::vector<double> & x );
     void Sigmoid( std::vector<double> & x );
