@@ -206,25 +206,25 @@ double DeepBayesIris::LogLikelihood(const std::vector<double>& parameters)
     //std::cout << "weights:" << weights.size() << " bias:" << bias.size() << std::endl;
 
     double L = 0;
-    long N = m_iris_data->size();
+    long N = m_iris_data->sepal_length.size();
     for( size_t i = 0 ; i < N ; i++ ) {
 
-        inputs[0] = m_iris_data->at(i).sepal_length;
-        inputs[1] = m_iris_data->at(i).sepal_width;
-        inputs[2] = m_iris_data->at(i).petal_length;
-        inputs[3] = m_iris_data->at(i).petal_width;
+        inputs[0] = m_iris_data->sepal_length.at(i);
+        inputs[1] = m_iris_data->sepal_width.at(i);
+        inputs[2] = m_iris_data->petal_length.at(i);
+        inputs[3] = m_iris_data->petal_width.at(i);
 
         //std::cout << "input: " << inputs[0] << " " << inputs[1] << " " << inputs[2] << " " << inputs[3] << std::endl;
 
         FeedForward( inputs, weights, bias, outputs );
 
-        if( m_iris_data->at(i).variety == SETOSA ) {
+        if( m_iris_data->variety.at(i) == SETOSA ) {
             targets = { 1., 0., 0. };
         }
-        else if( m_iris_data->at(i).variety == VERSICOLOR ) {
+        else if( m_iris_data->variety.at(i) == VERSICOLOR ) {
             targets = { 0., 1., 0. };
         }
-        else if ( m_iris_data->at(i).variety == VIRGINICA ) {
+        else if ( m_iris_data->variety.at(i) == VIRGINICA ) {
             targets = { 0., 0., 1. };
         }
 

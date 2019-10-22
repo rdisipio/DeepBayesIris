@@ -22,83 +22,21 @@
 
 #define CSV_IO_NO_THREAD
 
-void Standardize( IrisDataCollection_t& data )
+void Standardize( IrisDataCollection& data )
 {
-    const size_t n_data = data.size();
+    const size_t n_data = data.sepal_length.size();
     double mean = 0.;
     double stdev = 0;
 
     // sepal_length
-    mean = 0.;
-    stdev = 0;
-    for( int i = 0; i < n_data ; i++ ) {
-            mean += data[i].sepal_length;
-    }
-    mean /= float(n_data);
+    mean = std::accumulate( data.sepal_length.begin(), data.sepal_length.end(), 0. ) / double(n_data);
+    stdev = 0.;
+    std::for_each( data.sepal_length.begin(), data.sepal_length.end(), [&](const double x) {
+        stdev += ( x - mean ) * ( x - mean );
+    });
+    stdev = sqrt( stdev / double(n_data-1) );
 
-    for( int i = 0; i < n_data ; i++ ) {
-        stdev += ( data[i].sepal_length - mean )*( data[i].sepal_length - mean );
-    }
-    stdev /= float(n_data);
-    stdev = std::sqrt(stdev);
-
-    for( int i = 0; i < n_data ; i++ ) {
-        data[i].sepal_length = ( data[i].sepal_length - mean ) / stdev;
-    }
-
-    // sepal_width
-    mean = 0.;
-    stdev = 0;
-    for( int i = 0; i < n_data ; i++ ) {
-            mean += data[i].sepal_width;
-    }
-    mean /= float(n_data);
-
-    for( int i = 0; i < n_data ; i++ ) {
-        stdev += ( data[i].sepal_width - mean )*( data[i].sepal_width - mean );
-    }
-    stdev /= float(n_data);
-    stdev = std::sqrt(stdev);
-
-    for( int i = 0; i < n_data ; i++ ) {
-        data[i].sepal_width = ( data[i].sepal_width - mean ) / stdev;
-    }
-
-    // petal_length
-    mean = 0.;
-    stdev = 0;
-    for( int i = 0; i < n_data ; i++ ) {
-            mean += data[i].petal_length;
-    }
-    mean /= float(n_data);
-
-    for( int i = 0; i < n_data ; i++ ) {
-        stdev += ( data[i].petal_length - mean )*( data[i].petal_length - mean );
-    }
-    stdev /= float(n_data);
-    stdev = std::sqrt(stdev);
-
-    for( int i = 0; i < n_data ; i++ ) {
-        data[i].petal_length = ( data[i].petal_length - mean ) / stdev;
-    }
-
-    // petal_width
-    mean = 0.;
-    stdev = 0;
-    for( int i = 0; i < n_data ; i++ ) {
-            mean += data[i].petal_width;
-    }
-    mean /= float(n_data);
-
-    for( int i = 0; i < n_data ; i++ ) {
-        stdev += ( data[i].petal_width - mean )*( data[i].petal_width - mean );
-    }
-    stdev /= float(n_data);
-    stdev = std::sqrt(stdev);
-
-    for( int i = 0; i < n_data ; i++ ) {
-        data[i].petal_width = ( data[i].petal_width - mean ) / stdev;
-    }
+    
 }
 
 int main()
@@ -114,38 +52,46 @@ int main()
     io::CSVReader<5> ifile("iris.csv");
     ifile.read_header( io::ignore_extra_column, "sepal.length","sepal.width","petal.length","petal.width","variety" );
 
-    IrisDataCollection_t all_iris_data;
-    iris_data_t iris_data;
-    std::string variety;
-    while(ifile.read_row( iris_data.sepal_length, iris_data.sepal_width, iris_data.petal_length, iris_data.petal_width, variety ) ) {
-        variety.erase(remove( variety.begin(), variety.end(), '\"' ), variety.end()); // remove quotes from string
+    IrisDataCollection all_iris_data;
+    double sepal_length = 0.;
+    double sepal_width = 0.;
+    double petal_length = 0.;
+    double petal_width = 0.;
+    std::string s_variety;
+    while(ifile.read_row( sepal_length, sepal_width, petal_length, petal_width, s_variety ) ) {
+        s_variety.erase(remove( s_variety.begin(), s_variety.end(), '\"' ), s_variety.end()); // remove quotes from string
 
-        if( variety == "Setosa" ) {
-            iris_data.variety = IRIS_VARIETY::SETOSA;
+        IRIS_VARIETY variety;
+        if( s_variety == "Setosa" ) {
+            variety = IRIS_VARIETY::SETOSA;
          }
-         else if( variety == "Versicolor" ) {
-             iris_data.variety = IRIS_VARIETY::VERSICOLOR;
+         else if( s_variety == "Versicolor" ) {
+             variety = IRIS_VARIETY::VERSICOLOR;
          }
-         else if( variety == "Virginica" ) {
-             iris_data.variety = IRIS_VARIETY::VIRGINICA;
+         else if( s_variety == "Virginica" ) {
+             variety = IRIS_VARIETY::VIRGINICA;
          }
          else{
-             throw std::runtime_error("Unknown variety: " + variety);
+             throw std::runtime_error("Unknown variety: " + s_variety);
         }
 
-        all_iris_data.push_back( iris_data );
+        all_iris_data.sepal_length.push_back( sepal_length );
+        all_iris_data.sepal_width.push_back( sepal_width );
+        all_iris_data.petal_length.push_back( petal_length );
+        all_iris_data.petal_width.push_back( petal_width );
+        all_iris_data.variety.push_back( variety );
     }
 
-    const int n_data = all_iris_data.size();
+    const int n_data = all_iris_data.sepal_length.size();
     BCLog::OutSummary("Input data: found " + std::to_string(n_data) + " entries." );
 
     // Pre-process input data
     Standardize( all_iris_data );
     for( int i = 0; i < n_data; i++ ) {
-        std::cout   << all_iris_data.at(i).sepal_length << " "
-                    << all_iris_data.at(i).sepal_width << " "
-                    << all_iris_data.at(i).petal_length << " "
-                    << all_iris_data.at(i).petal_width << std::endl;
+        std::cout   << all_iris_data.sepal_length.at(i) << " "
+                    << all_iris_data.sepal_width.at(i) << " "
+                    << all_iris_data.petal_length.at(i) << " "
+                    << all_iris_data.petal_width.at(i) << std::endl;
     }
 
     BCLog::OutSummary("Input data: done.");

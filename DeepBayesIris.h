@@ -23,15 +23,16 @@ enum IRIS_VARIETY {
     kNumVarieties = 3
 };
 
-struct iris_data_t {
-    double sepal_length;
-    double sepal_width;
-    double petal_length;
-    double petal_width;
+ 
+struct IrisDataCollection {
+    std::vector<double> sepal_length;
+    std::vector<double> sepal_width;
+    std::vector<double> petal_length;
+    std::vector<double> petal_width;
     //std::string variety;
-    IRIS_VARIETY variety;
+    std::vector<IRIS_VARIETY> variety;
 };
-typedef std::vector<iris_data_t> IrisDataCollection_t;
+//typedef std::vector<iris_data_t> IrisDataCollection_t;
 
 // ---------------------------------------------------------
 class DeepBayesIris : public BCModel
@@ -51,8 +52,8 @@ public:
     // Overload LogAprioriProbability if not using built-in 1D priors
     // double LogAPrioriProbability(const std::vector<double> & parameters);
 
-    void SetIrisData( IrisDataCollection_t& data ) { m_iris_data = &data; };
-    IrisDataCollection_t * GetIrisData() const { return m_iris_data; };
+    void SetIrisData( IrisDataCollection& data ) { m_iris_data = &data; };
+    IrisDataCollection * GetIrisData() const { return m_iris_data; };
 
 protected:
     void GetWeights( std::vector<double> parameters, std::vector<double>& weights, std::vector<double>& bias );
@@ -64,7 +65,7 @@ protected:
     void Softmax( std::vector<double> & x );
 
 private:
-    IrisDataCollection_t * m_iris_data;
+    IrisDataCollection * m_iris_data;
 
     int m_n_inputs;
     int m_n_hidden;
