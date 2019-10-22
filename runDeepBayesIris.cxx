@@ -112,8 +112,8 @@ int main()
     DeepBayesIris m("DeepBayesIris");
 
     // set precision
-    //m.SetPrecision(BCEngineMCMC::kMedium);
-    m.SetPrecision(BCEngineMCMC::kHigh);
+    m.SetPrecision(BCEngineMCMC::kMedium);
+    //m.SetPrecision(BCEngineMCMC::kHigh);
     m.SetNIterationsPreRunMax( 1000000 );
 
     m.SetIrisData( all_iris_data );
