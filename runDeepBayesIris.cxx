@@ -116,8 +116,8 @@ int main()
 
     // set precision
     //m.SetPrecision(BCEngineMCMC::kMedium);
-    //m.SetPrecision(BCEngineMCMC::kHigh);
-    m.SetPrecision(BCEngineMCMC::kVeryHigh);
+    m.SetPrecision(BCEngineMCMC::kHigh);
+    //m.SetPrecision(BCEngineMCMC::kVeryHigh);
     //m.SetNIterationsPreRunMax( 5000000 );
 
     m.SetIrisData( all_iris_data );

@@ -26,7 +26,7 @@ DeepBayesIris::DeepBayesIris(const std::string& name)
     const float max_weight = 100.;
 
     m_n_inputs = 4;
-    m_n_hidden = 2;
+    m_n_hidden = 5;
     m_n_outputs = 3;
 
     int n_chains = GetNChains();
