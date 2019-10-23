@@ -13,27 +13,13 @@
 
 #include <string>
 #include <vector>
-#include <string>
+
+#include "data_types.h"
+#include "FeedForward.h"
 
 // This is a DeepBayesIris header file.
 // Model source code is located in file DeepBayesIris/DeepBayesIris.cxx
 
-enum IRIS_VARIETY {
-    SETOSA = 0,
-    VERSICOLOR = 1,
-    VIRGINICA = 2,
-    kNumVarieties = 3
-};
-
- 
-struct IrisDataCollection {
-    std::vector<double> sepal_length;
-    std::vector<double> sepal_width;
-    std::vector<double> petal_length;
-    std::vector<double> petal_width;
-    //std::string variety;
-    std::vector<IRIS_VARIETY> variety;
-};
 //typedef std::vector<iris_data_t> IrisDataCollection_t;
 
 // ---------------------------------------------------------
@@ -62,13 +48,7 @@ public:
 protected:
     void MCMCUserIterationInterface();
 
-    void GetWeights( std::vector<double> parameters, std::vector<double>& Wh, std::vector<double>& Wy, std::vector<double>& bh, std::vector<double>& by );
-    void FeedForward( std::vector<double> &inputs, std::vector<double>& Wh, std::vector<double>& Wy, std::vector<double>& bh, std::vector<double>& by, std::vector<double> & outputs );
-
-    void ReLU( std::vector<double> & x );
-    void Sigmoid( std::vector<double> & x );
-    void Tanh( std::vector<double> & x );
-    void Softmax( std::vector<double> & x );
+    FeedForward * m_mlp;
 
 private:
     IrisDataCollection * m_iris_data;

@@ -26,8 +26,10 @@ DeepBayesIris::DeepBayesIris(const std::string& name)
     const float max_weight = 100.;
 
     m_n_inputs = 4;
-    m_n_hidden = 5;
+    m_n_hidden = 2; //5;
     m_n_outputs = 3;
+
+    m_mlp = new FeedForward( m_n_inputs, m_n_hidden, m_n_outputs );
 
     int n_chains = GetNChains();
     char cname[32];
@@ -93,122 +95,15 @@ DeepBayesIris::DeepBayesIris(const std::string& name)
 DeepBayesIris::~DeepBayesIris()
 {
     // destructor
+
+    if( m_mlp ) delete m_mlp;
+
     /*
     int n_chains = GetNChains();
     for( int i = 0 ; i < n_chains; i++ ) {
         delete m_loss[i];
     }
     */
-}
-
-void DeepBayesIris::ReLU( std::vector<double> & x )
-{
-    for( size_t i = 0 ; i < x.size() ; i++ ) {
-        x[i] = ( x[i]>0.) ? x[i] : 0.;
-    }
-}
-
-void DeepBayesIris::Sigmoid( std::vector<double> & x )
-{
-   for( size_t i = 0 ; i < x.size() ; i++ ) {
-       double exp_value = exp((double) -x[i]);
-       x[i] = 1. / (1. + exp_value);
-   }
-}
-
-void DeepBayesIris::Tanh( std::vector<double> & x )
-{
-    for( size_t i = 0 ; i < x.size() ; i++ ) {
-        x[i] = tanh(x[i]);
-    }
-}
-
-void DeepBayesIris::Softmax( std::vector<double> & x )
-{
-    double N = 0.;
-    for( size_t i = 0 ; i < x.size() ; i++ ) {
-        N += std::exp( x[i] );
-    }
-
-    for( size_t i = 0 ; i < x.size() ; i++ ) {
-        x[i] = std::exp(x[i]) / N;
-    }
-}
-
-// ---------------------------------------------------------
-void DeepBayesIris::FeedForward( std::vector<double> &inputs, 
-                                std::vector<double> &Wh, std::vector<double> &Wy,
-                                std::vector<double> &bh, std::vector<double> &by,
-                                std::vector<double> & outputs )
-{
-    // h_i = sigma(Wh_ij * x_j + b_i )
-
-    std::vector<double> hidden( m_n_hidden, 0. );
-
-    //std::cout << inputs.size() << " " << weights.size() << " " << bias.size() << " " << outputs.size() <<  std::endl;
-
-    // hidden layer
-    int k = 0;
-    for( int i = 0 ; i < m_n_hidden ; i++ ) {
-        hidden[i] = bh.at(i);
-
-        for( int j = 0 ; j < m_n_inputs ; j++ ) {
-            hidden[i] += inputs.at(j) * Wh.at(k);
-            k++;
-        }
-        
-    }
-
-    //ReLU( hidden );
-    Tanh( hidden );
-
-    // output layer
-    k = 0;
-    for( int i = 0 ; i < m_n_outputs ; i++ ) {
-        outputs[i] = by[i];
-
-        for( int j = 0 ; j < m_n_hidden ; j++ ) {
-            outputs[i] += hidden[j] * Wy[k];
-            k++;
-        }
-        
-    }
-
-    Softmax( outputs );
-    //Sigmoid( outputs );
-}
-
-// ---------------------------------------------------------
-void DeepBayesIris::GetWeights( std::vector<double> parameters, 
-                                std::vector<double>& Wh, std::vector<double>& Wy, 
-                                std::vector<double>& bh, std::vector<double>& by )
-{
-    int k = 0;
-    // hidden layer
-    for( int i = 0 ; i < m_n_hidden ; i++ ) {
-        for( int j = 0 ; j < m_n_inputs ; j++ ) {
-            double w = parameters[k];
-            Wh.push_back(w);
-            k++;
-        }
-
-        double b = parameters[k];
-        bh.push_back( b );
-        k++;
-    }
-
-    // output layer
-    for( int i = 0 ; i < m_n_outputs ; i++ ) {
-        for( int j = 0 ; j < m_n_hidden ; j++ ) {
-            double w = parameters[k];
-            Wy.push_back(w);
-            k++;
-        }
-
-        double b = parameters[k];
-        by.push_back( b );
-        k++;
-    }
 }
 
 // ---------------------------------------------------------
@@ -226,8 +121,7 @@ double DeepBayesIris::LogLikelihood(const std::vector<double>& parameters)
     std::vector<double> outputs( m_n_outputs, 0. );
     std::vector<double> targets( m_n_outputs, 0. );
 
-    GetWeights( parameters, Wh, Wy, bh, by );
-    //std::cout << "weights:" << weights.size() << " bias:" << bias.size() << std::endl;
+    m_mlp->SetWeights( parameters );
 
     double L = 0;
     long N = m_iris_data->sepal_length.size();
@@ -240,7 +134,7 @@ double DeepBayesIris::LogLikelihood(const std::vector<double>& parameters)
 
         //std::cout << "input: " << inputs[0] << " " << inputs[1] << " " << inputs[2] << " " << inputs[3] << std::endl;
 
-        FeedForward( inputs, Wh, Wy, bh, by, outputs );
+        m_mlp->predict( inputs, outputs );
 
         if( m_iris_data->variety.at(i) == SETOSA ) {
             targets = { 1., 0., 0. };
