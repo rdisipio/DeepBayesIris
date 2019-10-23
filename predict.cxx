@@ -35,9 +35,10 @@ int main( int argc, char *argv[] )
     int n_hidden = 0;
     int n_outputs = 0;
     int idata = 0;
-    int n_runs = 100;
+    int n_runs = 1000;
 
     if( argc > 0 ) idata = atoi( argv[1] );
+    if( argc > 1 ) n_runs = atoi( argv[2] );
 
     // read data from file
     io::CSVReader<5> ifile("iris.csv");
