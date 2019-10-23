@@ -185,8 +185,10 @@ int main( int argc, char *argv[] )
         total += category[i];
     }
     for( int i = 0; i < n_outputs ; ++i ) {
-        category[i] /= total;
-        std::cout << "Category " << i << ": " << category[i] << std::endl;
+        double y = category[i] / total;
+        double dy = sqrt(category[i]) / total;
+        
+        std::cout << "Category " << i << ": " << y << " +- " << dy << std::endl;
     }
 
     if( mlp ) delete mlp;
