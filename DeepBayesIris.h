@@ -45,6 +45,8 @@ public:
 
     std::vector<TGraph*>& GetLossGraphs() { return m_loss; };
 
+    void SaveWeights( const std::string& fname = "weights.txt" );
+
 protected:
     void MCMCUserIterationInterface();
 

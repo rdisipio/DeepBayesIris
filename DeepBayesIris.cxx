@@ -8,6 +8,7 @@
 
 #include <stdio.h>
 #include <iostream>
+#include <fstream>
 #include <cmath>
 
 #include <BAT/BCMath.h>
@@ -182,4 +183,23 @@ void DeepBayesIris::MCMCUserIterationInterface()
         m_loss.at(ichain)->SetPoint( n, double(n), logP );
     }
     */
+}
+
+// ---------------------------------------------------------
+void DeepBayesIris::SaveWeights( const std::string& fname )
+{   
+    std::ofstream ofile;
+    ofile.open( fname );
+
+    const int n_params = GetNParameters();
+
+    for (unsigned i = 0; i < n_params; ++i) {
+        double w = GetBestFitParameters()[i];
+        double dw = GetBestFitParameterErrors()[i];
+
+        const std::string& pname = GetParameter(i).GetName();
+
+        ofile << pname << "," << w << "," << dw << "\n";
+    }
+    ofile.close();
 }

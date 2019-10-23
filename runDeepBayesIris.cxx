@@ -150,6 +150,8 @@ int main()
     // print results of the analysis into a text file
     m.PrintSummary();
 
+    m.SaveWeights( "weights.txt" );
+
     std::vector<TGraph*> loss = m.GetLossGraphs();
     TFile * ofile = TFile::Open( "loss.root", "RECREATE" );
     for( int i = 0; i < loss.size() ; i++ ) {
