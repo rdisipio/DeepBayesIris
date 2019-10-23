@@ -170,7 +170,7 @@ int main( int argc, char *argv[] )
         };
         std::vector<double> outputs(n_outputs, 0.);
         mlp->predict( inputs, outputs );
-        //std::cout << outputs[0] << " " << outputs[1] << " " << outputs[2] << std::endl;
+        //std::cout << outputs[0] << "," << outputs[1] << "," << outputs[2] << std::endl;
 
         for( int i = 0; i < n_outputs ; ++i ) { 
             category[i] += outputs[i];
