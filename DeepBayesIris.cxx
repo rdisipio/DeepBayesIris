@@ -12,6 +12,7 @@
 #include <cmath>
 
 #include <BAT/BCMath.h>
+#include <TH2D.h>
 
 // ---------------------------------------------------------
 DeepBayesIris::DeepBayesIris(const std::string& name)
@@ -193,6 +194,7 @@ void DeepBayesIris::SaveWeights( const std::string& fname )
 
     const int n_params = GetNParameters();
 
+    ofile << "<weights>\n";
     for (unsigned i = 0; i < n_params; ++i) {
         double w = GetBestFitParameters()[i];
         double dw = GetBestFitParameterErrors()[i];
@@ -201,5 +203,31 @@ void DeepBayesIris::SaveWeights( const std::string& fname )
 
         ofile << pname << "," << w << "," << dw << "\n";
     }
+    ofile << "</weights>\n";
+
+    double corr[n_params][n_params];
+    for (unsigned i = 0; i < n_params; ++i) {
+        for (unsigned j = i; j < n_params; ++j) {
+            if( i != j ) {
+                TH2D * h = (TH2D*)GetMarginalizedHistogram(i,j);
+                corr[i][j] = h->GetCorrelationFactor();
+                corr[j][i] = corr[i][j];
+            }
+            else {
+                corr[i][j] = 1.;
+            }
+        }
+    }
+    // now print out to file
+    ofile << "<correlations>\n";
+    for (unsigned i = 0; i < n_params; ++i) {
+        for (unsigned j = 0; j < n_params; ++j) {
+            ofile << corr[i][j];
+            if( i < (n_params-1) ) ofile << ",";
+        }
+        ofile << "\n";
+    }           
+    ofile << "</correlations>\n";
+
     ofile.close();
 }

@@ -87,8 +87,8 @@ int main()
     DeepBayesIris m("DeepBayesIris");
 
     // set precision
-    //m.SetPrecision(BCEngineMCMC::kLow);
-    m.SetPrecision(BCEngineMCMC::kMedium);
+    m.SetPrecision(BCEngineMCMC::kLow);
+    //m.SetPrecision(BCEngineMCMC::kMedium);
     //m.SetPrecision(BCEngineMCMC::kHigh);
     //m.SetPrecision(BCEngineMCMC::kVeryHigh);
     //m.SetNIterationsPreRunMax( 5000000 );
@@ -124,12 +124,14 @@ int main()
 
     m.SaveWeights( "weights.txt" );
 
+    /*
     std::vector<TGraph*> loss = m.GetLossGraphs();
     TFile * ofile = TFile::Open( "loss.root", "RECREATE" );
     for( int i = 0; i < loss.size() ; i++ ) {
         loss[i]->Write();
     }
     ofile->Close();
+    */
 
     // close log file
     BCLog::OutSummary("Exiting");
