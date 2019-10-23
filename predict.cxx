@@ -37,6 +37,8 @@ int main( int argc, char *argv[] )
     int idata = 0;
     int n_runs = 100;
 
+    if( argc > 0 ) idata = atoi( argv[1] );
+
     // read data from file
     io::CSVReader<5> ifile("iris.csv");
     ifile.read_header( io::ignore_extra_column, "sepal.length","sepal.width","petal.length","petal.width","variety" );
