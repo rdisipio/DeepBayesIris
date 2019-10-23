@@ -22,7 +22,7 @@ CXXSRCS = DeepBayesIris.cxx FeedForward.cxx
 # List of all program sources used in the program
 # Add classes to the end. Backslash indicates continuation
 # on the next line
-PRGSRCS = runDeepBayesIris.cxx
+PRGSRCS = runDeepBayesIris.cxx predict.cxx
 
 # compiler and flags
 CXX       = g++
@@ -47,10 +47,10 @@ CXXOBJS = $(addsuffix .o,$(basename $(CXXSRCS)))
 MYPROGS = $(basename $(PRGSRCS))
 PRGOBJS = $(addsuffix .o,$(basename $(PRGSRCS)))
 
-GARBAGE = $(CXXOBJS) $(PRGOBJS) link.d $(MYPROGS) predict
+GARBAGE = $(CXXOBJS) $(PRGOBJS) link.d $(MYPROGS) 
 
 # targets
-all : $(MYPROGS) predict
+all : $(MYPROGS)
 
 .PHONY : all clean print
 
@@ -66,8 +66,8 @@ $(CXXOBJS) $(PRGOBJS) :
 $(MYPROGS) : $(CXXOBJS)
 	$(CXX) $(LDFLAGS) $^ $(LIBS) -o $@
 
-predict : predict.cxx FeedForward.o
-	$(CXX) $(LDFLAGS) -stdlib=libc++ -std=c++11 -m64 $^ -o $@
+#predict : predict.cxx FeedForward.o
+#	$(CXX) $(LDFLAGS) -stdlib=libc++ -std=c++11 -m64 $^ -o $@
 
 clean :
 	rm -f $(GARBAGE)

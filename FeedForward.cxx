@@ -92,7 +92,7 @@ void FeedForward::SetWeights( const std::vector<double>& parameters )
 }
 
 // ---------------------------------------------------------
-void FeedForward::predict( std::vector<double> &inputs, std::vector<double> &outputs )
+void FeedForward::predict( const std::vector<double> &inputs, std::vector<double> &outputs )
 {
     // h_i = sigma(Wh_ij * x_j + b_i )
 

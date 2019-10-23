@@ -11,7 +11,7 @@ class FeedForward
         virtual ~FeedForward();
     
         void SetWeights( const std::vector<double>& parameters );
-        void predict( std::vector<double> &inputs, std::vector<double> &outputs );
+        void predict( const std::vector<double> &inputs, std::vector<double> &outputs );
 
     protected:
         int m_n_inputs;

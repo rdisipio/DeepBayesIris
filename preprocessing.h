@@ -8,18 +8,26 @@
 
 #include "data_types.h"
 
-void Standardize( std::vector<double> &data ) {
+void CalcMeanStdev( const std::vector<double> &data, double& mean, double& stdev )
+{
     const size_t n_data = data.size();
-    double mean = 0.;
-    double stdev = 0;
+    mean = 0.;
+    stdev = 0;
 
-    // sepal_length
     mean = std::accumulate( data.begin(), data.end(), 0. ) / double(n_data);
+
     stdev = 0.;
     std::for_each( data.begin(), data.end(), [&](const double x) {
         stdev += ( x - mean ) * ( x - mean );
     });
     stdev = sqrt( stdev / double(n_data-1) );
+}
+
+void Standardize( std::vector<double> &data ) {
+    const size_t n_data = data.size();
+    double mean = 0.;
+    double stdev = 0;
+    CalcMeanStdev( data, mean, stdev );
 
     for( int i = 0 ; i < n_data ; i++ ) {
         data[i] -= mean;

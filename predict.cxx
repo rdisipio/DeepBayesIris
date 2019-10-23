@@ -11,6 +11,10 @@ using namespace std;
 #include "data_types.h"
 #include "FeedForward.h"
 
+#include <TFile.h>
+#include <TH2D.h>
+#include <TH1D.h>
+
 // taken from: https://github.com/ben-strasser/fast-cpp-csv-parser
 #include "csv.h"
 #define CSV_IO_NO_THREAD
@@ -85,6 +89,12 @@ int main( int argc, char *argv[] )
                 << all_iris_data.petal_length.at(idata) << " "
                 << all_iris_data.petal_width.at(idata) << std::endl;
     
+    const std::vector<double> inputs = {
+            all_iris_data.sepal_length.at(idata),
+            all_iris_data.sepal_width.at(idata),
+            all_iris_data.petal_length.at(idata),
+            all_iris_data.petal_width.at(idata),
+        };
     // read weights
 
     std::vector<double> weights;
@@ -107,6 +117,9 @@ int main( int argc, char *argv[] )
     // number of weights is:
     const int n_weights = n_inputs*n_hidden + n_hidden + n_outputs*n_hidden + n_outputs;
 
+    TFile * rootfile = TFile::Open( "predict.root", "RECREATE" );
+    TH2D * h_corr = new TH2D( "corr", "Correlation Matrix", n_weights, -0.5, n_weights-0.5, n_weights, -0.5, n_weights-0.5 );
+
     std::vector<std::string> w;
     for( int i = 0 ; i < n_weights ; i++ ) {
         getline(wfile, line);
@@ -127,6 +140,7 @@ int main( int argc, char *argv[] )
         tokenize(tmp, line);
         for( int j = 0 ; j < n_weights ; j++ ) {
             corr[i][j] = stod( tmp.at(j) );
+            h_corr->SetBinContent( i+1, j+1, corr[i][j] );
         }
     }
 
@@ -141,8 +155,19 @@ int main( int argc, char *argv[] )
         generator.push_back( gaussian_t(x,s) );
     }
 
+    std::cout << "Calculating the nominal output" << std::endl;
+    mlp->SetWeights( weights );
+    std::vector<double> outputs_0(n_outputs, 0.);
+    mlp->predict( inputs, outputs_0 );
+    for( int i = 0; i < n_outputs ; ++i ) { 
+        std::cout << "Category " << i << ": " << outputs_0.at(i) << std::endl;
+    }
+
     std::cout << "Executing " << n_runs << " repeated executions..." << std::endl;
-    std::vector<double> category(n_outputs, 0 );
+    std::vector< std::vector<double> > category(n_outputs);
+
+    TH2D * h_output = new TH2D( "output", "Classifier output", n_outputs, -0.5, n_outputs-0.5, 100, 0., 1. );
+
     for( int irun = 0 ; irun < n_runs ; ++irun ) {
         std::vector<double> parameters;
         for( int k = 0 ; k < n_weights ; k++ ) {
@@ -162,35 +187,37 @@ int main( int argc, char *argv[] )
         }
         mlp->SetWeights( parameters_smeared );
 
-        std::vector<double> inputs = {
-            all_iris_data.sepal_length.at(idata),
-            all_iris_data.sepal_width.at(idata),
-            all_iris_data.petal_length.at(idata),
-            all_iris_data.petal_width.at(idata),
-        };
         std::vector<double> outputs(n_outputs, 0.);
         mlp->predict( inputs, outputs );
         //std::cout << outputs[0] << "," << outputs[1] << "," << outputs[2] << std::endl;
 
         for( int i = 0; i < n_outputs ; ++i ) { 
-            category[i] += outputs[i];
+            double y = outputs[i];
+            category[i].push_back( y );
+
+            h_output->Fill( i, y );
         }
 
     }
     std::cout << "...done." << endl;
 
-    // normalize result
-    double total = 0.;
+    std::vector<double> y( n_outputs, 0. );
+    std::vector<double> dy( n_outputs, 0. );
+
     for( int i = 0; i < n_outputs ; ++i ) {
-        total += category[i];
-    }
-    for( int i = 0; i < n_outputs ; ++i ) {
-        double y = category[i] / total;
-        double dy = sqrt(category[i]) / total;
-        
-        std::cout << "Category " << i << ": " << y << " +- " << dy << std::endl;
+        double mean;
+        double stdev;
+        CalcMeanStdev( category[i], mean, stdev );
+        y[i] = mean;
+        dy[i] = stdev;
+
+        std::cout << "Category " << i << ": " << mean << " +- " << stdev << std::endl;
     }
 
     if( mlp ) delete mlp;
+
+    rootfile->Write();
+    rootfile->Close();
+
     return 0;
 }
