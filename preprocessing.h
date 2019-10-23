@@ -2,6 +2,11 @@
 #define __PREPROCESSING_H__
 
 #include <vector>
+#include <numeric>
+#include <cmath>
+#include <iterator>
+
+#include "data_types.h"
 
 void Standardize( std::vector<double> &data ) {
     const size_t n_data = data.size();

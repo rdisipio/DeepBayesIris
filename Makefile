@@ -47,10 +47,10 @@ CXXOBJS = $(addsuffix .o,$(basename $(CXXSRCS)))
 MYPROGS = $(basename $(PRGSRCS))
 PRGOBJS = $(addsuffix .o,$(basename $(PRGSRCS)))
 
-GARBAGE = $(CXXOBJS) $(PRGOBJS) link.d $(MYPROGS)
+GARBAGE = $(CXXOBJS) $(PRGOBJS) link.d $(MYPROGS) predict
 
 # targets
-all : $(MYPROGS)
+all : $(MYPROGS) predict
 
 .PHONY : all clean print
 
@@ -65,6 +65,9 @@ $(CXXOBJS) $(PRGOBJS) :
 
 $(MYPROGS) : $(CXXOBJS)
 	$(CXX) $(LDFLAGS) $^ $(LIBS) -o $@
+
+predict : predict.cxx FeedForward.o
+	$(CXX) $(LDFLAGS) -stdlib=libc++ -std=c++11 -m64 $^ -o $@
 
 clean :
 	rm -f $(GARBAGE)

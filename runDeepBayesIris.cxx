@@ -10,7 +10,6 @@
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
-#include <numeric>
 
 #include <TGraph.h>
 #include <TFile.h>
@@ -23,10 +22,9 @@
 
 // taken from: https://github.com/ben-strasser/fast-cpp-csv-parser
 #include "csv.h"
-
 #define CSV_IO_NO_THREAD
 
-int main()
+int main( int argc, char *argv[] )
 {
     // set nicer style for drawing than the ROOT default
     BCAux::SetStyle();
