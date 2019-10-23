@@ -155,10 +155,6 @@ double DeepBayesIris::LogLikelihood(const std::vector<double>& parameters)
             GetObservable(i).Value( outputs[i]);
         }
 
-        //std::cout << "input " << i << ":" << inputs[0] << " " << inputs[1] << " " << inputs[2] << " " << inputs[3] << std::endl;
-        //std::cout << "O=" << outputs[0] << " " << outputs[1] << " " << outputs[2] << std::endl;
-        //std::cout << "T=" << targets[0] << " " << targets[1] << " " << targets[2] << std::endl;
-
     }
     
     return L;
@@ -194,6 +190,10 @@ void DeepBayesIris::SaveWeights( const std::string& fname )
 
     const int n_params = GetNParameters();
 
+    ofile << "<network arch=\'mlp\'>\n";
+    ofile << m_n_inputs << "," << m_n_hidden << "," << m_n_outputs << "\n";
+    ofile << "</network>\n";
+
     ofile << "<weights>\n";
     for (unsigned i = 0; i < n_params; ++i) {
         double w = GetBestFitParameters()[i];
@@ -223,7 +223,7 @@ void DeepBayesIris::SaveWeights( const std::string& fname )
     for (unsigned i = 0; i < n_params; ++i) {
         for (unsigned j = 0; j < n_params; ++j) {
             ofile << corr[i][j];
-            if( i < (n_params-1) ) ofile << ",";
+            if( j < (n_params-1) ) ofile << ",";
         }
         ofile << "\n";
     }           
