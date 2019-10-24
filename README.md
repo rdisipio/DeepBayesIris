@@ -7,12 +7,18 @@ BAT: https://github.com/bat/bat
 
 # Installation
 
-## Install ROOT (downloading binaries is recommended), and set it up:
+## Install ROOT 
+
+Downloading binaries is recommended over compiling source files. 
+
+To set it up:
+
 ```
 source ${HOME}/local/root/bin/thisroot.sh
 ```
 
 ## Install BAT
+
 ```
 ./configure --prefix=$HOME/local
 make
