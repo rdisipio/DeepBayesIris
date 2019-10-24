@@ -5,6 +5,7 @@
 #include <numeric>
 #include <cmath>
 #include <iterator>
+#include <algorithm>
 
 #include "data_types.h"
 
