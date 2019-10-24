@@ -28,7 +28,7 @@ DeepBayesIris::DeepBayesIris(const std::string& name)
     const float max_weight = 100.;
 
     m_n_inputs = 4;
-    m_n_hidden = 2; //5;
+    m_n_hidden = 2; //2
     m_n_outputs = 3;
 
     m_mlp = new FeedForward( m_n_inputs, m_n_hidden, m_n_outputs );
