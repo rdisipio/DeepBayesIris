@@ -85,10 +85,10 @@ int main( int argc, char *argv[] )
     DeepBayesIris m("DeepBayesIris");
 
     // set precision
-    m.SetPrecision(BCEngineMCMC::kLow);
+    //m.SetPrecision(BCEngineMCMC::kLow);
     //m.SetPrecision(BCEngineMCMC::kMedium);
     //m.SetPrecision(BCEngineMCMC::kHigh);
-    //m.SetPrecision(BCEngineMCMC::kVeryHigh);
+    m.SetPrecision(BCEngineMCMC::kVeryHigh);
     //m.SetNIterationsPreRunMax( 5000000 );
 
     m.SetIrisData( all_iris_data );

@@ -87,6 +87,7 @@ int main( int argc, char *argv[] )
                 << all_iris_data.sepal_width.at(idata) << " "
                 << all_iris_data.petal_length.at(idata) << " "
                 << all_iris_data.petal_width.at(idata) << std::endl;
+    std::cout << "Real category: " << all_iris_data.variety.at(idata) << std::endl;
     
     const std::vector<double> inputs = {
             all_iris_data.sepal_length.at(idata),
@@ -191,8 +192,7 @@ int main( int argc, char *argv[] )
             Z[0][i] = rng->Gaus(0.,1.); // standard normal distribution
             mu[i][0] = weights.at(i);
         }
-        TMatrixD X = mu;
-        X += L*Z.T();
+        TMatrixD X = mu + L*Z.T();
 
         std::vector<double> parameters;
         for( int i = 0 ; i < n_weights ; i++ ) {
