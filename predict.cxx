@@ -3,7 +3,6 @@
 #include <sstream>
 #include <stdexcept>
 #include <string> 
-#include <random>
 
 using namespace std; 
 
@@ -14,12 +13,14 @@ using namespace std;
 #include <TFile.h>
 #include <TH2D.h>
 #include <TH1D.h>
+#include <TMatrixDSym.h>
+#include <TMatrixD.h>
+#include <TDecompChol.h>
+#include <TRandom3.h>
 
 // taken from: https://github.com/ben-strasser/fast-cpp-csv-parser
 #include "csv.h"
 #define CSV_IO_NO_THREAD
-
-typedef std::normal_distribution<double> gaussian_t;
 
 void tokenize( std::vector<std::string>& tokens, std::string& text, const char delimiter = ',' )
 {
@@ -32,8 +33,6 @@ void tokenize( std::vector<std::string>& tokens, std::string& text, const char d
 
 int main( int argc, char *argv[] )
 {
-    std::default_random_engine rng;
-
     FeedForward * mlp = NULL;
     int n_inputs = 0;
     int n_hidden = 0;
@@ -131,29 +130,29 @@ int main( int argc, char *argv[] )
     }
     getline(wfile, line); // </weights>
 
-    std::cout << "Reading correlation matrix" << std::endl;
+    std::cout << "Reading covariance matrix" << std::endl;
     getline(wfile, line); // <correlations>
-    double corr[n_weights][n_weights];
+    TMatrixD corr(n_weights, n_weights);
+    TMatrixD sigma(n_weights, n_weights);
     for( int i = 0 ; i < n_weights ; i++ ) {
+        sigma[i][i] = errors.at(i);
+
         getline(wfile, line);
         std::vector<string> tmp;
         tokenize(tmp, line);
         for( int j = 0 ; j < n_weights ; j++ ) {
-            corr[i][j] = stod( tmp.at(j) );
+            corr[i][j] = stod( tmp.at(j) ); 
             h_corr->SetBinContent( i+1, j+1, corr[i][j] );
         }
     }
+    TMatrixD cov = sigma * corr * sigma;
 
     mlp = new FeedForward( n_inputs, n_hidden, n_outputs );
 
     // setup RNG
     std::cout << "Setting up RNG" << std::endl;
-    std::vector<gaussian_t> generator;
-    for( int i = 0 ; i < n_weights ; i++ ) {
-        double x = weights.at(i);
-        double s = errors.at(i);
-        generator.push_back( gaussian_t(x,s) );
-    }
+    TRandom3 * rng = new TRandom3();
+    rng->SetSeed(12345);
 
     std::cout << "Calculating the nominal output" << std::endl;
     mlp->SetWeights( weights );
@@ -169,23 +168,37 @@ int main( int argc, char *argv[] )
     TH2D * h_output = new TH2D( "output", "Classifier output", n_outputs, -0.5, n_outputs-0.5, 100, 0., 1. );
 
     for( int irun = 0 ; irun < n_runs ; ++irun ) {
+
+        // You can turn a standard normal random variable z~N(0,1) into a
+        // normal random variable with mean μ and variance σ 
+        // by first scaling by the square root of the variance (i.e., the standard deviation) 
+        // and then moving the result to have the correct mean (adding μ)
+        // x = μ + √σ * N(0,1)
+        // The same idea holds in the multivariate case, but instead of having a scalar value for the variance 
+        // we have a covariance matrix
+        // What is the square root of a matrix? C = C^1/2 * (C^1/2)^T
+        // The most common method is given by the Cholesky decompostion C = U^T U where U = upper triangular
+        // Hence: X = μ + U^T*Z
+
+        TDecompChol chol( cov );
+        chol.Decompose();
+        TMatrixD L( chol.GetU( ));
+        L.T(); // lower triangular
+
+        TMatrixD Z(1,n_weights);
+        TMatrixD mu(n_weights,1);
+        for( int i = 0 ; i < n_weights ; i++ ) {
+            Z[0][i] = rng->Gaus(0.,1.); // standard normal distribution
+            mu[i][0] = weights.at(i);
+        }
+        TMatrixD X = mu;
+        X += L*Z.T();
+
         std::vector<double> parameters;
-        for( int k = 0 ; k < n_weights ; k++ ) {
-            double p = generator[k]( rng );
-            parameters.push_back(p);
+        for( int i = 0 ; i < n_weights ; i++ ) {
+            parameters.push_back( X[i][0] );
         }
-
-        //smear parameters with correlation matrix
-        std::vector<double> parameters_smeared;
-        for( int j = 0 ; j < n_weights ; j++ ) {
-            double p = 0.;
-
-            for( int k = 0 ; k < n_weights ; k++ ) {
-                p += corr[j][k] * parameters.at(k);
-            }
-            parameters_smeared.push_back(p);
-        }
-        mlp->SetWeights( parameters_smeared );
+        mlp->SetWeights( parameters );
 
         std::vector<double> outputs(n_outputs, 0.);
         mlp->predict( inputs, outputs );
@@ -215,6 +228,7 @@ int main( int argc, char *argv[] )
     }
 
     if( mlp ) delete mlp;
+    if( rng ) delete rng;
 
     rootfile->Write();
     rootfile->Close();
