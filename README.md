@@ -1,13 +1,13 @@
 # DeepBayesIris
 
-# Requirements:
+## Requirements:
 ROOT: https://root.cern.ch/
 
 BAT: https://github.com/bat/bat
 
-# Installation
+## Installation
 
-## Install ROOT 
+### Install ROOT 
 
 Downloading binaries is recommended over compiling source files. 
 
@@ -17,7 +17,7 @@ To set it up:
 source ${HOME}/local/root/bin/thisroot.sh
 ```
 
-## Install BAT
+### Install BAT
 
 ```
 ./configure --prefix=$HOME/local
@@ -27,7 +27,7 @@ make install
 
 Make sure the BAT libraries are available (follow instructions to set up environment variables)
 
-## Compile DeepBayesIris
+### Compile DeepBayesIris
 
 ```
 git clone https://github.com/rdisipio/DeepBayesIris.git
