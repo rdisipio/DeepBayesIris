@@ -45,12 +45,21 @@ Run:
 Inspect output file:
 
 ```
-root predict.root
+root predict_0.root
 root [0] 
-Attaching file predict.root as _file0...
+Attaching file predict_0.root as _file0...
 (TFile *) 0x7faac86e2830
 root [0] output->Draw("lego")
 ```
 
+## Make plots
+To make nice-looking plots:
+
+```
+root
+root [0] .L make_plot.C 
+root [1] make_plot(1) // event id=1
+root [2] make_plot(70) // event id=70
+```
 
 
